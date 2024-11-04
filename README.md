@@ -1,6 +1,8 @@
 # csu33012-2425-project19
 
-
+## Group Delegations (for the moment)
+frontend: Kate, Travis, Salvatore
+backend: Julia, Leela, Adel
 
 ## Getting started
 
