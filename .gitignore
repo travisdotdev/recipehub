@@ -6,11 +6,6 @@ backend/
 ../backend/
 ../backend/**
 
-# Build directories
-/target/
-../target/
-**/target/
-
 
 
 # Dependencies
