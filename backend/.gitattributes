@@ -1,0 +1,38 @@
+# Default behavior: normalize line endings for all text files
+* text=auto
+
+# Java source files
+*.java text diff=java
+*.groovy text diff=java
+*.gradle text diff=java
+
+# Properties files
+*.properties text
+*.xml text
+*.yml text
+*.yaml text
+
+# Scripts
+*.sh text eol=lf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# JAR files should be treated as binary
+*.jar binary
+*.war binary
+
+# Image files should be treated as binary
+*.png binary
+*.jpg binary
+*.gif binary
+*.ico binary
+*.svg text
+
+# Documentation
+*.md text diff=markdown
+*.txt text
+*.pdf binary
+
+# IDE project files
+*.classpath text
+*.project text
