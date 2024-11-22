@@ -1,12 +1,5 @@
-# Strict backend exclusions
-backend/
-/backend/
-/backend/**
-**/backend/
-../backend/
-../backend/**
-
-
+/backend
+/target
 
 # Dependencies
 **/node_modules
