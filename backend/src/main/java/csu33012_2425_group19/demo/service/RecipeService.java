@@ -74,6 +74,21 @@ public class RecipeService {
     }
 
     /**
+     * Get random recipes with optional filtering
+     * 
+     * @param number The number of random recipes to return (between 1 and 100)
+     * @param includeTags Tags that the recipes must match (comma-separated)
+     * @param excludeTags Tags that the recipes must not match (comma-separated)
+     * @param includeNutrition Whether to include nutrition information
+     * @return List of recipe DTOs
+     */
+    public List<RecipeDTO> getRandomRecipes(Integer number, String includeTags, 
+            String excludeTags, boolean includeNutrition) {
+        return spoonacularService.getRandomRecipes(number, includeTags, 
+            excludeTags, includeNutrition);
+    }
+
+    /**
      * Helper method to convert DTO to entity and save
      */
     @Transactional

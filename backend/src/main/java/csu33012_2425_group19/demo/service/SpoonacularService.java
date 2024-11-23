@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;  
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -18,7 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
-
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Service
 public class SpoonacularService {
@@ -38,10 +40,12 @@ public class SpoonacularService {
     }
 
     @Getter
-    @RequiredArgsConstructor
+    @NoArgsConstructor
+    @AllArgsConstructor
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class RandomRecipeResponse {
-        private final List<RecipeDTO> recipes;
+        @JsonProperty("recipes")
+        private List<RecipeDTO> recipes;
     }
 
     @Getter
@@ -114,6 +118,57 @@ public class SpoonacularService {
         dayRequests.incrementAndGet();
     }
 
+    /**
+     * Get random recipes with optional filtering
+     * 
+     * @param number The number of random recipes to return (between 1 and 100)
+     * @param includeTags Tags that the recipes must match (comma-separated)
+     * @param excludeTags Tags that the recipes must not match (comma-separated)
+     * @param includeNutrition Whether to include nutrition information
+     * @return List of recipes
+     */
+    public List<RecipeDTO> getRandomRecipes(Integer number, String includeTags, String excludeTags, boolean includeNutrition) {
+        checkRateLimits();
+        
+        logger.info("Fetching {} random recipes with includeTags: {}, excludeTags: {}, includeNutrition: {}", 
+            number, includeTags, excludeTags, includeNutrition);
+        
+        try {
+            RandomRecipeResponse response = webClient.get()
+                .uri(uriBuilder -> {
+                    uriBuilder
+                        .path("/recipes/random")
+                        .queryParam("number", Math.min(Math.max(number, 1), 100))
+                        .queryParam("addRecipeInformation", true)
+                        .queryParam("fillIngredients", true);
+
+                    if (includeTags != null && !includeTags.isEmpty()) {
+                        uriBuilder.queryParam("tags", includeTags);
+                    }
+                    if (excludeTags != null && !excludeTags.isEmpty()) {
+                        uriBuilder.queryParam("exclude-tags", excludeTags);
+                    }
+                    
+                    uriBuilder.queryParam("includeNutrition", includeNutrition);
+                    
+                    return uriBuilder.build();
+                })
+                .retrieve()
+                .bodyToMono(RandomRecipeResponse.class)
+                .doOnNext(randomResponse -> 
+                    logger.info("Retrieved {} random recipes", 
+                        randomResponse.getRecipes() != null ? randomResponse.getRecipes().size() : 0))
+                .block();
+
+                return response != null && response.getRecipes() != null ? 
+                response.getRecipes() : Collections.emptyList();
+        } catch (Exception e) {
+            logger.error("Error in getRandomRecipes: {}", e.getMessage());
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, 
+                "Error fetching random recipes", e);
+        }
+    }
+    
     /**
      * Search recipes by ingredients
      */

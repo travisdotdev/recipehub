@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import csu33012_2425_group19.demo.entity.Recipe;
 import csu33012_2425_group19.demo.dto.ParsedInstruction;
 import csu33012_2425_group19.demo.service.RecipeService;
+import csu33012_2425_group19.demo.dto.RecipeDTO;
 import java.util.List;
 
 @RestController
@@ -54,6 +55,20 @@ public class RecipeController {
         try {
             List<ParsedInstruction> instructions = recipeService.getRecipeInstructions(id);
             return ResponseEntity.ok(instructions);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @GetMapping("/random")
+    public ResponseEntity<List<RecipeDTO>> getRandomRecipes(
+            @RequestParam(defaultValue = "10") Integer number,
+            @RequestParam(required = false) String includeTags,
+            @RequestParam(required = false) String excludeTags,
+            @RequestParam(defaultValue = "false") boolean includeNutrition) {
+        try {
+            List<RecipeDTO> recipes = recipeService.getRandomRecipes(number, includeTags, excludeTags, includeNutrition);
+            return ResponseEntity.ok(recipes);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
