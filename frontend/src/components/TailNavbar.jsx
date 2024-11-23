@@ -26,7 +26,7 @@ const TailNavbar = ({ brandName = "RecipeHub" }) => {
   const navItems = [
     { name: 'Home', path: '/' },
     { name: 'Search Recipes', path: '/search' },
-    { name: 'Recipe Details', path: '/recipe/1' },
+    //{ name: 'Recipe Details', path: '/recipe/1' },
     { name: 'Shopping List', path: '/shopping-list' },
     { name: 'About Us', path: '/about-us' },
   ];
