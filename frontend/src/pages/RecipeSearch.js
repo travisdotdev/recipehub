@@ -97,7 +97,7 @@ function RecipeSearch() {
               </ul>
             </div>
         ) : (
-            <RecipeDetail recipe={selectedRecipe} />
+          <RecipeDetail recipe={selectedRecipe} goBack={() => setSelectedRecipe(null)} />
         )}
       </div>
   );
