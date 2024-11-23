@@ -1,7 +1,7 @@
-package csu33012_2425_group19.demo.model;
+package csu33012_2425_group19.demo.dto;
 
-import java.util.List;
 import lombok.Data;
+import java.util.List;
 
 @Data
 public class ParsedInstruction {
@@ -10,7 +10,7 @@ public class ParsedInstruction {
 
     @Data
     public static class Step {
-        private int number;
+        private Integer number;
         private String step;
         private List<Ingredient> ingredients;
         private List<Equipment> equipment;
@@ -18,7 +18,7 @@ public class ParsedInstruction {
 
     @Data
     public static class Ingredient {
-        private int id;
+        private Long id;
         private String name;
         private String localizedName;
         private String image;
@@ -26,7 +26,7 @@ public class ParsedInstruction {
 
     @Data
     public static class Equipment {
-        private int id;
+        private Long id;
         private String name;
         private String localizedName;
         private String image;
