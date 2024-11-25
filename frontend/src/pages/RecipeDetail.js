@@ -1,164 +1,193 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { ChevronLeft, Clock, Users } from 'lucide-react';
 
-function RecipeDetail({ recipe, goBack }) {
-  const [isHovering, setIsHovering] = useState(false);
-  if (!recipe) {
-    return <p style={{ color: 'red' }}>No recipe details available.</p>;
+const RecipeDetail = () => {
+  const [recipe, setRecipe] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const { id } = useParams();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    let isMounted = true; // Flag to prevent state updates after unmount
+    
+    const fetchRecipe = async () => {
+      try {
+        // Only set loading state if component is still mounted
+        if (isMounted) {
+          setIsLoading(true);
+          setError(null); // Clear any previous errors
+        }
+
+        const response = await fetch(`http://localhost:8080/api/recipes/${id}`);
+        
+        // Check if component is still mounted before proceeding
+        if (!isMounted) return;
+
+        if (!response.ok) {
+          throw new Error(`Recipe not found (Status: ${response.status})`);
+        }
+        
+        const data = await response.json();
+        
+        // Only update state if component is still mounted
+        if (isMounted) {
+          setRecipe({
+            id: data.id || data.spoonacularId,
+            title: data.title || 'Untitled Recipe',
+            readyInMinutes: data.readyInMinutes || 0,
+            servings: data.servings || 1,
+            image: data.image || null,
+            instructions: data.instructions || '',
+            summary: data.summary || '',
+            sourceUrl: data.sourceUrl || '',
+            extendedIngredients: data.extendedIngredients || [],
+            analyzedInstructions: data.analyzedInstructions || []
+          });
+          setIsLoading(false);
+        }
+      } catch (err) {
+        // Only update error state if component is still mounted
+        if (isMounted) {
+          console.error('Error fetching recipe:', err);
+          setError(err.message);
+          setIsLoading(false);
+        }
+      }
+    };
+
+    if (id) {
+      fetchRecipe();
+    }
+
+    // Cleanup function to prevent state updates after unmount
+    return () => {
+      isMounted = false;
+    };
+  }, [id]); // Only re-run if id changes
+
+  // Early return while loading
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 pt-16 px-4">
+        <div className="max-w-3xl mx-auto mt-8">
+          <button
+            onClick={() => navigate(-1)}
+            className="mb-6 flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 bg-white rounded-lg shadow-sm hover:shadow transition-all"
+          >
+            <ChevronLeft className="w-5 h-5" />
+            Back
+          </button>
+          <div className="animate-pulse flex flex-col space-y-4">
+            <div className="h-8 bg-gray-200 rounded w-1/4"></div>
+            <div className="h-64 bg-gray-200 rounded"></div>
+            <div className="h-8 bg-gray-200 rounded w-3/4"></div>
+            <div className="h-8 bg-gray-200 rounded w-1/2"></div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
-  const ingredients = recipe.extendedIngredients || [];
-  const instructions =
-    recipe.analyzedInstructions?.length > 0
-      ? recipe.analyzedInstructions[0].steps
-      : [];
+  // Show error state with back button
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 pt-16 px-4">
+        <div className="max-w-3xl mx-auto mt-8">
+          <button
+            onClick={() => navigate(-1)}
+            className="mb-6 flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 bg-white rounded-lg shadow-sm hover:shadow transition-all"
+          >
+            <ChevronLeft className="w-5 h-5" />
+            Back
+          </button>
+          <div className="bg-red-50 text-red-600 p-4 rounded-lg">
+            {error}. Please try again later.
+          </div>
+        </div>
+      </div>
+    );
+  }
 
+  // Show nothing if no recipe (shouldn't happen with loading state)
+  if (!recipe) {
+    return null;
+  }
+
+  // Main render
   return (
-    <div style={styles.background}>
-      <div style={styles.recipeCard}>
-        <button 
-          onClick={goBack} 
-          onMouseEnter={() => setIsHovering(true)}
-          onMouseLeave={() => setIsHovering(false)}
-          style={{
-          ...styles.backButton,
-          ...(isHovering ? styles.backButtonHover : {})
-          }}
+    <div className="min-h-screen bg-gray-50 pt-16 px-4">
+      <div className="max-w-3xl mx-auto mt-8">
+        <button
+          onClick={() => navigate(-1)}
+          className="mb-6 flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 bg-white rounded-lg shadow-sm hover:shadow transition-all"
         >
-          Back to Search
+          <ChevronLeft className="w-5 h-5" />
+          Back
         </button>
-        <h2 style={styles.title}>{recipe.title || "Unknown Recipe"}</h2>
-        {recipe.image && (
-          <img
-            src={recipe.image}
-            alt={recipe.title}
-            style={{ width: "100%", borderRadius: "8px", marginBottom: "15px" }}
-          />
-        )}
-        <p style={styles.cookTime}>
-          Cook Time: {recipe.readyInMinutes || "N/A"} minutes
-        </p>
-        <div style={styles.recipeInfo}>
-       
-          <h3 style={styles.sectionTitle}>What You Need:</h3>
-          {ingredients.length > 0 ? (
-            <ul style={styles.ingredientsList}>
-              {ingredients.map((ingredient, index) => {
-                const name = ingredient.name || ingredient.original || "Unknown Ingredient";
-                const amount = ingredient.amount?.us?.value || "N/A";
-                const unit = ingredient.amount?.us?.unit || "";
-                return (
-                  <li key={index} style={styles.ingredient}>
-                    {`${amount} ${unit} ${name}`}
-                  </li>
-                );
-              })}
-            </ul>
-          ) : (
-            <p>No ingredients available for this recipe.</p>
-          )}
 
-          <h3 style={styles.sectionTitle}>How to:</h3>
-          {instructions.length > 0 ? (
-            <ol style={styles.instructionsList}>
-              {instructions.map((step, index) => (
-                <li key={index} style={styles.instruction}>
-                  {step.step || "Unknown Step"}
-                </li>
-              ))}
-            </ol>
-          ) : (
-            <p>No instructions available for this recipe.</p>
+        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+          {recipe.image && (
+            <img
+              src={recipe.image}
+              alt={recipe.title}
+              className="w-full h-64 object-cover"
+            />
           )}
+          
+          <div className="p-6">
+            <h1 className="text-3xl font-bold text-gray-900 mb-4">
+              {recipe.title}
+            </h1>
+            
+            <div className="flex items-center gap-6 mb-6">
+              <div className="flex items-center gap-2 text-gray-600">
+                <Clock className="w-5 h-5" />
+                <span>{recipe.readyInMinutes} minutes</span>
+              </div>
+              <div className="flex items-center gap-2 text-gray-600">
+                <Users className="w-5 h-5" />
+                <span>{recipe.servings} servings</span>
+              </div>
+            </div>
+
+            {recipe.summary && (
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold text-gray-900 mb-3">Summary</h2>
+                <div 
+                  className="text-gray-700"
+                  dangerouslySetInnerHTML={{ __html: recipe.summary }}
+                />
+              </div>
+            )}
+
+            {recipe.instructions && (
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold text-gray-900 mb-3">Instructions</h2>
+                <p className="text-gray-700 whitespace-pre-line">
+                  {recipe.instructions}
+                </p>
+              </div>
+            )}
+
+            {recipe.sourceUrl && (
+              <div className="mt-6 pt-6 border-t border-gray-200">
+                <a 
+                  href={recipe.sourceUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:text-blue-800 transition-colors"
+                >
+                  View Original Recipe
+                </a>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
   );
-}
-
-const styles = {
-  background: {
-    minHeight: '100vh',
-    backgroundImage:
-      'url(https://st4.depositphotos.com/1000875/26566/v/450/depositphotos_265662920-stock-illustration-young-woman-chef-in-retro.jpg)',
-    backgroundSize: 'cover',
-    backgroundPosition: 'top center',
-    backgroundAttachment: 'fixed',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-    padding: '20px',
-    paddingTop: '80px',
-  },
-  recipeCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    padding: '20px',
-    borderRadius: '12px',
-    width: '90%',
-    maxWidth: '500px',
-    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
-    textAlign: 'center',
-    overflow: 'auto',
-    maxHeight: '90vh',
-    marginTop: '20px',
-  },
-  backButton: {
-    backgroundColor: '#e0e0e0', 
-    color: '#222',
-    border: 'none',
-    borderRadius: '8px',
-    padding: '10px 15px',
-    marginBottom: '20px',
-    cursor: 'pointer',
-    fontSize: '1rem',
-    textAlign: 'center',
-    boxShadow: '0 2px 5px rgba(0, 0, 0, 0.2)', 
-    transition: 'background-color 0.3s, color 0.3s', 
-  },
-  backButtonHover: {
-    backgroundColor: '#d0d0d0', 
-  },
-  title: {
-    fontSize: '1.8rem',
-    color: '#333',
-    margin: '10px 0',
-  },
-  cookTime: {
-    fontSize: '1rem',
-    color: '#777',
-    marginBottom: '15px',
-  },
-  recipeInfo: {
-    textAlign: 'left',
-    marginTop: '15px',
-  },
-  sectionTitle: {
-    fontSize: '1.3rem',
-    color: '#444',
-    borderBottom: '1px solid #ddd',
-    paddingBottom: '8px',
-    marginBottom: '10px',
-  },
-  ingredientsList: {
-    listStyleType: 'none',
-    padding: '0',
-    color: '#555',
-    marginBottom: '20px',
-  },
-  ingredient: {
-    fontSize: '1rem',
-    color: '#333',
-    marginBottom: '5px',
-  },
-  instructionsList: {
-    listStyleType: 'decimal',
-    paddingLeft: '20px',
-    color: '#333',
-    lineHeight: '1.6',
-  },
-  instruction: {
-    fontSize: '1rem',
-    marginBottom: '10px',
-  },
 };
 
 export default RecipeDetail;

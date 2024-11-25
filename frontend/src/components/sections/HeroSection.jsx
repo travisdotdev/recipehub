@@ -19,7 +19,7 @@ const HeroSection = ({
         `}
         style={{ backgroundImage: backgroundImage ? `url(${backgroundImage})` : undefined }}
       >
-        <div className="absolute inset-0 bg-black/10" />
+        <div className="absolute inset-0 bg-black/1" /> {/* Darkened overlay */}
       </div>
       
       {/* Content */}
@@ -30,16 +30,16 @@ const HeroSection = ({
           transition-all duration-1000 delay-300
           ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}
         `}>
-          <div className="max-w-2xl text-left">
+          <div className="max-w-2xl text-left bg-black/60 p-6 rounded-xl backdrop-blur-sm">
             <h1 className={`
-              text-4xl font-bold sm:text-5xl lg:text-6xl
+              text-4xl font-bold sm:text-5xl lg:text-6xl text-white
               transition-all duration-700 delay-500
               ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}
             `}>
               {title}
             </h1>
             <p className={`
-              mt-6 text-lg sm:text-xl
+              mt-6 text-lg sm:text-xl text-gray-200
               transition-all duration-700 delay-700
               ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}
             `}>

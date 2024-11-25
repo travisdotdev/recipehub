@@ -22,7 +22,7 @@ const defaultConfig = {
       base: 'absolute top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 shadow-lg z-10 transition-all duration-200',
       size: 'h-10 w-10',        // Button size - e.g., 'h-12 w-12' for larger buttons
       color: 'text-gray-800',   // Arrow color - e.g., 'text-blue-600' for blue arrows
-      disabled: 'opacity-50 cursor-not-allowed' // Disabled state styling
+      disabled: 'opacity-30 cursor-not-allowed' // Disabled state styling
     },
     // Button positioning
     position: {

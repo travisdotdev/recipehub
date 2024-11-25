@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import HeroSection from '../components/sections/HeroSection';
 import RecipeSection from '../components/sections/RecipeSection';
 import useRecipes from '../hooks/useRecipes';
+import testImage from '../assets/images/testBackground2k.jpg';
 
 const Home = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -42,7 +43,7 @@ const Home = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Memoized render function for recipe sections to prevent unnecessary re-renders
+  
   const renderRecipeSection = useCallback(({ title, recipes, isLoading, error, variant, className }) => (
     <RecipeSection
       title={title}
@@ -51,7 +52,7 @@ const Home = () => {
       error={error}
       variant={variant}
       className={className}
-      key={title} // Add key to help React identify each section uniquely
+      key={title} 
     />
   ), []);
 
@@ -68,9 +69,14 @@ const Home = () => {
 
   return (
     <main className="relative">
-      <HeroSection isVisible={isVisible}>
+      <HeroSection 
+        isVisible={isVisible}
+        backgroundImage={testImage}
+        title="Discover Delicious Recipes"
+        subtitle="Find and share the best recipes from around the world"
+      >
         <div className="w-full">
-          <h2 className="text-3xl font-bold text-black mt-10 mb-8 max-w-7xl mx-auto px-4">
+          <h2 className="text-3xl font-bold text-white mt-10 mb-8 max-w-7xl mx-auto px-4">
             Featured Recipes
           </h2>
           {renderRecipeSection({

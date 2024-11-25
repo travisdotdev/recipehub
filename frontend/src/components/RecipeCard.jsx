@@ -7,56 +7,55 @@ import { Clock, Users } from 'lucide-react';
  * Default configuration object for the RecipeCard component.
  * Modify these values to change the appearance of the card.
  */
+// Card container styling
 const defaultConfig = {
   // Card container styling
   card: {
-    width: 'w-30',              // Card width - Change to 'w-80', 'w-96' etc for different widths
-    height: 'h-70',             // Card height - Change to 'h-80', 'h-[400px]' etc for different heights
-    padding: 'p-3',             // Internal padding - e.g., 'p-6' for more spacing
-    backgroundColor: 'bg-white', // Background color - e.g., 'bg-gray-50' for different background
-    borderRadius: 'rounded-xl',  // Border radius - e.g., 'rounded-2xl' for more rounded corners
-    shadow: 'shadow-md',        // Shadow effect - e.g., 'shadow-lg' for stronger shadow
-    border: 'border border-gray-100', // Border style - e.g., 'border-2' for thicker border
+    width: 'w-64',              // Reduced from w-30 to w-64 for smaller width
+    height: 'h-80',             // Adjusted height to maintain proportion
+    padding: 'p-3',             
+    backgroundColor: 'bg-white',
+    borderRadius: 'rounded-xl',  
+    shadow: 'shadow-md',        
+    border: 'border border-gray-100',
     
-    // Hover animation properties
-    transition: 'transition-all duration-300', // Animation speed - e.g., 'duration-500' for slower
+    transition: 'transition-all duration-300',
     hover: {
-      scale: 'hover:scale-105',           // Hover zoom effect - e.g., 'hover:scale-110' for more zoom
-      translate: 'hover:-translate-y-1',   // Hover lift effect - e.g., 'hover:-translate-y-2' for more lift
-      shadow: 'hover:shadow-xl'           // Hover shadow - e.g., 'hover:shadow-2xl' for stronger shadow
+      scale: 'hover:scale-102',  // Reduced scale effect
+      translate: 'hover:-translate-y-1',
+      shadow: 'hover:shadow-lg'  // Reduced shadow effect
     }
   },
 
-  // Recipe image styling
+  // Image styling
   image: {
-    height: 'h-100',             // Image height - e.g., 'h-52' for taller image
-    objectFit: 'object-cover',  // Image fitting - e.g., 'object-contain' to show full image
-    borderRadius: 'rounded-t-xl' // Image border radius - should match card's borderRadius
+    height: 'h-48',             // Reduced height for the image
+    objectFit: 'object-cover',
+    borderRadius: 'rounded-t-xl'
   },
 
-  // Image overlay styling (darkens image for better text visibility)
+  // Rest of the config remains the same...
   overlay: {
-    gradient: 'bg-gradient-to-t from-black/60 to-transparent', // Gradient opacity and direction
-    opacity: 'opacity-100'      // Overlay opacity - e.g., 'opacity-75' for lighter overlay
+    gradient: 'bg-gradient-to-t from-black/60 to-transparent',
+    opacity: 'opacity-100'
   },
 
-  // Recipe title styling
   title: {
-    fontSize: 'text-xl',        // Title size - e.g., 'text-2xl' for larger text
-    fontWeight: 'font-semibold', // Title weight - e.g., 'font-bold' for bolder text
-    color: 'text-gray-800',     // Title color - e.g., 'text-gray-900' for darker text
-    lineClamp: 'line-clamp-2',  // Number of lines before truncating - e.g., 'line-clamp-3' for 3 lines
-    marginBottom: 'mb-3'        // Spacing below title - e.g., 'mb-4' for more space
+    fontSize: 'text-lg',        // Reduced font size
+    fontWeight: 'font-semibold',
+    color: 'text-gray-800',
+    lineClamp: 'line-clamp-2',
+    marginBottom: 'mb-2'        // Reduced margin
   },
 
-  // Recipe details (cooking time, servings) styling
   details: {
-    fontSize: 'text-sm',        // Details text size - e.g., 'text-base' for larger text
-    color: 'text-gray-600',     // Details text color - e.g., 'text-gray-700' for darker text
-    iconSize: 'w-4 h-4',        // Icon size - e.g., 'w-5 h-5' for larger icons
-    spacing: 'gap-4'            // Spacing between details - e.g., 'gap-6' for more space
+    fontSize: 'text-sm',
+    color: 'text-gray-600',
+    iconSize: 'w-4 h-4',
+    spacing: 'gap-3'            // Reduced gap
   }
 };
+
 
 /**
  * RecipeCard Component
