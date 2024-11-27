@@ -3,9 +3,8 @@ package csu33012_2425_group19.demo.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import csu33012_2425_group19.demo.entity.Recipe;
 import csu33012_2425_group19.demo.dto.ParsedInstruction;
-import csu33012_2425_group19.demo.service.RecipeService;
+import csu33012_2425_group19.demo.service.SpoonacularService;
 import csu33012_2425_group19.demo.dto.RecipeDTO;
 import java.util.List;
 
@@ -14,26 +13,26 @@ import java.util.List;
 public class RecipeController {
 
     @Autowired
-    private RecipeService recipeService;
+    private SpoonacularService spoonacularService;
 
-    @GetMapping("/search")
-    public ResponseEntity<List<Recipe>> searchByIngredients(
+    @GetMapping("/searchByIngredients")
+    public ResponseEntity<List<RecipeDTO>> searchByIngredients(
             @RequestParam String ingredients,
             @RequestParam(defaultValue = "10") int number,
             @RequestParam(defaultValue = "1") int ranking,
             @RequestParam(defaultValue = "true") boolean ignorePantry) {
         try {
-            List<Recipe> recipes = recipeService.searchByIngredients(ingredients, number, ranking, ignorePantry);
+            List<RecipeDTO> recipes = spoonacularService.searchByIngredients(ingredients, number, ranking, ignorePantry);
             return ResponseEntity.ok(recipes);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
     }
 
-    @GetMapping("/complex-search")
-    public ResponseEntity<List<Recipe>> searchByName(@RequestParam String query) {
+    @GetMapping("/complexSearch")
+    public ResponseEntity<List<RecipeDTO>> complexSearch(@RequestParam String query) {
         try {
-            List<Recipe> recipes = recipeService.complexSearch(query);
+            List<RecipeDTO> recipes = spoonacularService.complexSearch(query);
             return ResponseEntity.ok(recipes);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
@@ -41,9 +40,9 @@ public class RecipeController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Recipe> getRecipeById(@PathVariable Long id) {
+    public ResponseEntity<RecipeDTO> getRecipeById(@PathVariable Long id) {
         try {
-            Recipe recipe = recipeService.getRecipeById(id);
+            RecipeDTO recipe = spoonacularService.getRecipeById(id);
             return ResponseEntity.ok(recipe);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
@@ -53,8 +52,31 @@ public class RecipeController {
     @GetMapping("/{id}/instructions")
     public ResponseEntity<List<ParsedInstruction>> getRecipeInstructions(@PathVariable Long id) {
         try {
-            List<ParsedInstruction> instructions = recipeService.getRecipeInstructions(id);
+            List<ParsedInstruction> instructions = spoonacularService.getRecipeInstructions(id);
             return ResponseEntity.ok(instructions);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @GetMapping("/{id}/information")
+    public ResponseEntity<RecipeDTO> getRecipeInformation(@PathVariable Long id) {
+        try {
+            RecipeDTO recipe = spoonacularService.getRecipeById(id);
+            return ResponseEntity.ok(recipe);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @GetMapping("/{id}/ingredients")
+    public ResponseEntity<List<RecipeDTO.ExtendedIngredient>> getRecipeIngredients(@PathVariable Long id) {
+        try {
+            RecipeDTO recipe = spoonacularService.getRecipeById(id);
+            if (recipe != null && recipe.getExtendedIngredients() != null) {
+                return ResponseEntity.ok(recipe.getExtendedIngredients());
+            }
+            return ResponseEntity.notFound().build();
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
@@ -67,7 +89,7 @@ public class RecipeController {
             @RequestParam(required = false) String excludeTags,
             @RequestParam(defaultValue = "false") boolean includeNutrition) {
         try {
-            List<RecipeDTO> recipes = recipeService.getRandomRecipes(number, includeTags, excludeTags, includeNutrition);
+            List<RecipeDTO> recipes = spoonacularService.getRandomRecipes(number, includeTags, excludeTags, includeNutrition);
             return ResponseEntity.ok(recipes);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
