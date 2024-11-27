@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import RecipeDetail from './RecipeDetail';
 
+const API_BASE_URL = 'http://localhost:8080';
+
 function RecipeSearch() {
   const [query, setQuery] = useState('');
   const [ingredients, setIngredients] = useState('');
@@ -9,10 +11,12 @@ function RecipeSearch() {
 
   const handleChange = (setter) => (event) => setter(event.target.value);
 
-  //options unused but leave in for now
   const fetchData = async (url, setter, options = {}) => {
     try {
-      const response = await fetch(url);
+      const response = await fetch(`${API_BASE_URL}${url}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       const data = await response.json();
       setter(Array.isArray(data) ? data : data.results || []);
       setSelectedRecipe(null);
@@ -31,35 +35,6 @@ function RecipeSearch() {
     event.preventDefault();
     fetchData(`/api/recipes/searchByIngredients?ingredients=${ingredients}`, setRecipes);
   };
-
-  const handleRecipeClick = async (recipe) => {
-    try {
-      //fetches full recipe details
-      const response = await fetch(`/api/recipes/${recipe.id}/information`);
-      const recipeDetails = await response.json();
-
-      //fetches analyzed instructions
-      const instructionsResponse = await fetch(`/api/recipes/${recipe.id}/instructions`);
-      const analyzedInstructions = await instructionsResponse.json();
-
-      //fetches ingredient widget data
-      const ingredientsResponse = await fetch(`/api/recipes/${recipe.id}/ingredients`);
-      const ingredients = await ingredientsResponse.json();
-
-      //combines all data
-      setSelectedRecipe({
-        ...recipeDetails,
-        title: recipeDetails.title || recipe.title || "Unknown Recipe",
-        image: recipeDetails.image || recipe.image || "",
-        analyzedInstructions: analyzedInstructions || [], //ensure instructions are included
-        extendedIngredients: ingredients.length ? ingredients : recipeDetails.extendedIngredients, //ensure ingredients are included
-      });
-    } catch (error) {
-      console.error("Error fetching recipe details, instructions, or ingredients:", error); //should make each fetch have its own error but this works for now
-      setSelectedRecipe(null);
-    }
-  };
-
 
   return (
       <div style={styles.container}>
@@ -89,7 +64,7 @@ function RecipeSearch() {
               </form>
               <ul style={styles.recipeList}>
                 {recipes.map((recipe) => (
-                    <li key={recipe.id} style={styles.recipeItem} onClick={() => handleRecipeClick(recipe)}>
+                    <li key={recipe.id} style={styles.recipeItem} onClick={() => setSelectedRecipe(recipe)}>
                       <h3>{recipe.title}</h3>
                       <img src={recipe.image} alt={recipe.title} style={styles.image} />
                     </li>
@@ -97,7 +72,10 @@ function RecipeSearch() {
               </ul>
             </div>
         ) : (
-          <RecipeDetail recipe={selectedRecipe} goBack={() => setSelectedRecipe(null)} />
+            <RecipeDetail
+                recipe={selectedRecipe}
+                goBack={() => setSelectedRecipe(null)}
+            />
         )}
       </div>
   );

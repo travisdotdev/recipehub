@@ -36,7 +36,7 @@ const FALLBACK_RECIPES = [
 const API_BASE_URL = 'http://localhost:8080'; // or whatever port your Spring Boot server is running on
 
 const recipeService = {
-  async getRandomRecipes(number = 10, includeTags = '', excludeTags = '', includeNutrition = false) {
+  async getRandomRecipes(number = 2, includeTags = '', excludeTags = '', includeNutrition = false) {
     // Create cache key
     const cacheKey = `random-${number}-${includeTags}-${excludeTags}-${includeNutrition}`;
     
@@ -51,7 +51,7 @@ const recipeService = {
       const timeoutId = setTimeout(() => controller.abort(), 5000);
 
       const params = new URLSearchParams({
-        number: Math.min(number, 20).toString(),
+        number: Math.min(number, 3).toString(),
         ...(includeTags && { includeTags }),
         ...(excludeTags && { excludeTags }),
         includeNutrition: includeNutrition.toString()
