@@ -57,9 +57,6 @@ bin/
 out/
 .idea_modules/
 
-# Lombok
-lombok.config
-.factorypath
 
 # Logs
 *.log
