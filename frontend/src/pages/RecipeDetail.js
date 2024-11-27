@@ -1,29 +1,34 @@
 import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { ChevronLeft, Clock, Users } from 'lucide-react';
 
 const API_BASE_URL = 'http://localhost:8080';
 
 const RecipeDetail = ({ recipe: initialRecipe, goBack }) => {
-  const [recipe, setRecipe] = useState({ ...initialRecipe });
-  const [isLoading, setIsLoading] = useState(false);
+  const [recipe, setRecipe] = useState(initialRecipe || null);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { id } = useParams(); // For route-based navigation
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchRecipeDetails = async () => {
-      if (!initialRecipe?.id) return;
+      // If we have initial recipe data (from search), use that ID, otherwise use route param
+      const recipeId = initialRecipe?.id || id;
+      if (!recipeId) return;
 
       setIsLoading(true);
       setError(null);
 
       try {
-        const response = await fetch(`${API_BASE_URL}/api/recipes/${initialRecipe.id}/information`);
+        const response = await fetch(`${API_BASE_URL}/api/recipes/${recipeId}/information`);
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const recipeDetails = await response.json();
 
         setRecipe({
           ...recipeDetails,
-          title: recipeDetails.title || initialRecipe.title || "Unknown Recipe",
-          image: recipeDetails.image || initialRecipe.image || "",
+          title: recipeDetails.title || initialRecipe?.title || "Unknown Recipe",
+          image: recipeDetails.image || initialRecipe?.image || "",
         });
       } catch (err) {
         console.error('Error fetching recipe details:', err);
@@ -34,13 +39,21 @@ const RecipeDetail = ({ recipe: initialRecipe, goBack }) => {
     };
 
     fetchRecipeDetails();
-  }, [initialRecipe?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [id, initialRecipe]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleBack = () => {
+    if (goBack) {
+      goBack(); // For search results
+    } else {
+      navigate(-1); // For route-based navigation
+    }
+  };
 
   if (isLoading) {
     return (
         <div className="min-h-screen bg-gray-50 pt-16 px-4">
           <div className="max-w-3xl mx-auto mt-8">
-            <button onClick={goBack} className="mb-6 flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 bg-white rounded-lg shadow-sm hover:shadow transition-all">
+            <button onClick={handleBack} className="mb-6 flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 bg-white rounded-lg shadow-sm hover:shadow transition-all">
               <ChevronLeft className="w-5 h-5" />
               Back
             </button>
