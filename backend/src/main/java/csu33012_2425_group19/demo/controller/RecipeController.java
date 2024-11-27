@@ -18,7 +18,7 @@ public class RecipeController {
     @GetMapping("/searchByIngredients")
     public ResponseEntity<List<RecipeDTO>> searchByIngredients(
             @RequestParam String ingredients,
-            @RequestParam(defaultValue = "10") int number,
+            @RequestParam(defaultValue = "5") int number,
             @RequestParam(defaultValue = "1") int ranking,
             @RequestParam(defaultValue = "true") boolean ignorePantry) {
         try {
@@ -84,7 +84,7 @@ public class RecipeController {
 
     @GetMapping("/random")
     public ResponseEntity<List<RecipeDTO>> getRandomRecipes(
-            @RequestParam(defaultValue = "10") Integer number,
+            @RequestParam(defaultValue = "1") Integer number,
             @RequestParam(required = false) String includeTags,
             @RequestParam(required = false) String excludeTags,
             @RequestParam(defaultValue = "false") boolean includeNutrition) {
