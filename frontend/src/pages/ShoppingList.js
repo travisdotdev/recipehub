@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import testImage from '../assets/images/testBackground2k.jpg';
 
 function ShoppingList() {
   const [items, setItems] = useState([]);
@@ -57,7 +58,7 @@ function ShoppingList() {
 const styles = {
   background: {
     height: '100vh',
-    backgroundImage: 'url(https://st4.depositphotos.com/1000875/26566/v/450/depositphotos_265662920-stock-illustration-young-woman-chef-in-retro.jpg)',
+    backgroundImage: `url(${testImage})`,
     backgroundSize: 'cover',
     backgroundPosition: 'top center',
     backgroundAttachment: 'fixed',
