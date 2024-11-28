@@ -1,173 +1,212 @@
-import React, { useState } from 'react';
-import RecipeDetail from './RecipeDetail';
+// Fallback data for when API is unavailable
+const FALLBACK_RECIPES = [
+  {
+    id: 1,
+    title: "Temporary Recipe 1",
+    readyInMinutes: 30,
+    servings: 4,
+    image: "/api/placeholder/400/300",
+    imageType: "jpg"
+  },
+  {
+    id: 2,
+    title: "Temporary Recipe 2",
+    readyInMinutes: 45,
+    servings: 6,
+    image: "/api/placeholder/400/300",
+    imageType: "jpg"
+  },
+  {
+    id: 3,
+    title: "Temporary Recipe 3",
+    readyInMinutes: 25,
+    servings: 2,
+    image: "/api/placeholder/400/300",
+    imageType: "jpg"
+  }
+];
 
+// Cache for storing recent API responses
+const cache = new Map();
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+// Add base URL for backend
 const API_BASE_URL = 'http://localhost:8080';
 
-function RecipeSearch() {
-  const [query, setQuery] = useState('');
-  const [ingredients, setIngredients] = useState('');
-  const [recipes, setRecipes] = useState([]);
-  const [selectedRecipe, setSelectedRecipe] = useState(null);
+const recipeService = {
+  async getRandomRecipes(number = 20, includeTags = '', excludeTags = '', includeNutrition = false) {
+    const cacheKey = `random-${number}-${includeTags}-${excludeTags}-${includeNutrition}`;
+    
+    const cachedData = cache.get(cacheKey);
+    if (cachedData && Date.now() - cachedData.timestamp < CACHE_DURATION) {
+      return cachedData.data;
+    }
 
-  const handleChange = (setter) => (event) => setter(event.target.value);
-
-  const fetchData = async (url, setter, options = {}) => {
     try {
-      const response = await fetch(`${API_BASE_URL}${url}`);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+      const params = new URLSearchParams({
+        number: Math.min(number, 20).toString(),
+        ...(includeTags && { includeTags }),
+        ...(excludeTags && { excludeTags }),
+        includeNutrition: includeNutrition.toString()
+      });
+
+      const response = await fetch(`${API_BASE_URL}/api/recipes/random?${params}`, {
+        signal: controller.signal,
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+      
+      clearTimeout(timeoutId);
+      
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
+      
       const data = await response.json();
-      setter(Array.isArray(data) ? data : data.results || []);
-      setSelectedRecipe(null);
+      const recipes = Array.isArray(data) ? data : [];
+
+      cache.set(cacheKey, {
+        data: recipes,
+        timestamp: Date.now()
+      });
+
+      return recipes;
+
     } catch (error) {
-      console.error('Error fetching data:', error);
-      setter([]);
+      console.error('Error fetching random recipes:', error);
+      return FALLBACK_RECIPES.slice(0, Math.min(number, FALLBACK_RECIPES.length));
     }
-  };
+  },
 
-  const searchByName = (event) => {
-    event.preventDefault();
-    fetchData(`/api/recipes/complexSearch?query=${query}`, setRecipes);
-  };
+  async searchRecipes(query, options = {}) {
+    try {
+      const params = new URLSearchParams({
+        query: query,
+        number: options.number || 10,
+        addRecipeInformation: true,
+        fillIngredients: true,
+        ...options
+      });
 
-  const searchByIngredients = (event) => {
-    event.preventDefault();
-    fetchData(`/api/recipes/searchByIngredients?ingredients=${ingredients}`, setRecipes);
-  };
+      const cacheKey = `search-${params.toString()}`;
+      const cachedData = cache.get(cacheKey);
+      if (cachedData && Date.now() - cachedData.timestamp < CACHE_DURATION) {
+        return cachedData.data;
+      }
 
-  return (
-      <div style={styles.container}>
-        {!selectedRecipe ? (
-            <div style={styles.content}>
-              <h1 style={styles.heading}>Recipe Search</h1>
-              <p style={styles.subheading}>Search by recipe name or by ingredients you have!</p>
-              <form onSubmit={searchByName} style={styles.form}>
-                <input
-                    type="text"
-                    value={query}
-                    onChange={handleChange(setQuery)}
-                    placeholder="Search for recipes by name..."
-                    style={styles.input}
-                />
-                <button type="submit" style={styles.button}>Search by Name</button>
-              </form>
-              <form onSubmit={searchByIngredients} style={styles.form}>
-                <input
-                    type="text"
-                    value={ingredients}
-                    onChange={handleChange(setIngredients)}
-                    placeholder="Enter ingredients (comma-separated)..."
-                    style={styles.input}
-                />
-                <button type="submit" style={styles.button}>Search by Ingredients</button>
-              </form>
-              <ul style={styles.recipeList}>
-                {recipes.map((recipe) => (
-                    <li key={recipe.id} style={styles.recipeItem} onClick={() => setSelectedRecipe(recipe)}>
-                      <h3>{recipe.title}</h3>
-                      <img src={recipe.image} alt={recipe.title} style={styles.image} />
-                    </li>
-                ))}
-              </ul>
-            </div>
-        ) : (
-            <RecipeDetail
-                recipe={selectedRecipe}
-                goBack={() => setSelectedRecipe(null)}
-            />
-        )}
-      </div>
-  );
-}
+      const response = await fetch(`${API_BASE_URL}/api/recipes/complexSearch?${params}`, {
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
 
-const styles = {
-  container: {
-    minHeight: '100vh', 
-    backgroundImage: 'url(https://st4.depositphotos.com/1000875/26566/v/450/depositphotos_265662920-stock-illustration-young-woman-chef-in-retro.jpg)',
-    backgroundSize: 'cover',
-    backgroundPosition: 'top center',
-    backgroundAttachment: 'fixed',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: '20px', 
-    backgroundRepeat: 'no-repeat',
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const recipes = Array.isArray(data) ? data : [];
+
+      cache.set(cacheKey, {
+        data: recipes,
+        timestamp: Date.now()
+      });
+
+      return recipes;
+
+    } catch (error) {
+      console.error('Error searching recipes:', error);
+      return FALLBACK_RECIPES;
+    }
   },
-  content: {
-    backgroundColor: 'rgba(0, 0, 0, 0.4)', 
-    padding: '2rem',
-    borderRadius: '8px',
-    width: '100%',
-    maxWidth: '600px', 
-    textAlign: 'center',
-    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)', 
+
+  async searchByIngredients(ingredients, number = 10) {
+    try {
+      const params = new URLSearchParams({
+        ingredients: ingredients,
+        number: number,
+        ranking: 2,  // maximize used ingredients
+        ignorePantry: true,
+        addRecipeInformation: true,  // Added to get full recipe details
+        fillIngredients: true        // Added to get complete ingredient information
+      });
+
+      const cacheKey = `ingredients-${params.toString()}`;
+      const cachedData = cache.get(cacheKey);
+      if (cachedData && Date.now() - cachedData.timestamp < CACHE_DURATION) {
+        return cachedData.data;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/recipes/searchByIngredients?${params}`, {
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      // Ensure all required fields are present
+      const recipes = Array.isArray(data) ? data.map(recipe => ({
+        ...recipe,
+        readyInMinutes: recipe.readyInMinutes || 30, // Default value if missing
+        servings: recipe.servings || 4,              // Default value if missing
+        image: recipe.image || "/api/placeholder/400/300",
+        imageType: recipe.imageType || "jpg"
+      })) : [];
+
+      cache.set(cacheKey, {
+        data: recipes,
+        timestamp: Date.now()
+      });
+
+      return recipes;
+
+    } catch (error) {
+      console.error('Error searching recipes by ingredients:', error);
+      return FALLBACK_RECIPES;
+    }
   },
-  heading: {
-    color: 'white',
-    fontSize: '2.5rem',
-    marginBottom: '1rem',
-    textShadow: '2px 2px 4px rgba(0, 0, 0, 0.7)',
-  },
-  subheading: {
-    color: 'white',
-    fontSize: '1.2rem',
-    marginBottom: '1.5rem',
-    textShadow: '1px 1px 3px rgba(0, 0, 0, 0.7)',
-  },
-  form: {
-    display: 'flex',
-    justifyContent: 'space-between', 
-    marginBottom: '1rem',
-  },
-  input: {
-    padding: '0.8rem',
-    marginRight: '0.8rem',
-    flex: 1, 
-    borderRadius: '4px',
-    border: 'none',
-    fontSize: '1rem',
-  },
-  button: {
-    padding: '0.8rem 1.5rem',
-    backgroundColor: '#ff7f50',
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    fontSize: '1rem',
-    transition: 'background-color 0.3s',
-    width: '150px', 
-  },
-  recipeList: {
-    listStyleType: 'none',
-    padding: 0,
-    color: 'white',
-    display: 'flex',
-    flexWrap: 'wrap',  
-    justifyContent: 'center',
-  },
-  recipeItem: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    padding: '10px',
-    margin: '10px',  
-    borderRadius: '5px',
-    cursor: 'pointer',
-    width: 'calc(33% - 20px)',  
-    boxSizing: 'border-box',    
-    textAlign: 'center',
-  },
-  image: {
-    maxWidth: '100%',
-    borderRadius: '5px',
-    height: 'auto',
-  },
-  instructions: {
-    marginTop: '20px',
-    color: 'white',
-    textAlign: 'left',
-  },
+
+  async getRecipeById(id) {
+    try {
+      const cacheKey = `recipe-${id}`;
+      const cachedData = cache.get(cacheKey);
+      if (cachedData && Date.now() - cachedData.timestamp < CACHE_DURATION) {
+        return cachedData.data;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/recipes/${id}`, {
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const recipe = await response.json();
+
+      cache.set(cacheKey, {
+        data: recipe,
+        timestamp: Date.now()
+      });
+
+      return recipe;
+
+    } catch (error) {
+      console.error('Error fetching recipe details:', error);
+      return FALLBACK_RECIPES[0];
+    }
+  }
 };
 
-
-export default RecipeSearch;
+export { recipeService };

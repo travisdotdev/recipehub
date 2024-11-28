@@ -54,6 +54,36 @@ public class Recipe {
     @Column(columnDefinition = "TEXT")
     private String instructions;
 
+    @Column(name = "aggregate_likes")
+    private Integer aggregateLikes;
+
+    @Column(name = "health_score")
+    private Double healthScore;
+
+    @Column(name = "spoonacular_score")
+    private Double spoonacularScore;
+
+    @Column(name = "price_per_serving")
+    private Double pricePerServing;
+
+    @Column(name = "is_popular")
+    private Boolean isPopular = false;
+
+    @Column(name = "is_featured")
+    private Boolean isFeatured = false;
+
+    @Column(name = "popularity_rank")
+    private Integer popularityRank;
+
+    @Column(name = "rating")
+    private Double rating;
+
+    @Column(name = "review_count")
+    private Integer reviewCount;
+
+    @Column(name = "last_api_sync")
+    private LocalDateTime lastApiSync;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
@@ -62,7 +92,25 @@ public class Recipe {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "data_version")
+    private Integer dataVersion = 1;
+
     public enum DifficultyLevel {
         EASY, MEDIUM, HARD
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        lastApiSync = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        dataVersion++;
+    }
+
+    public boolean needsUpdate() {
+        return lastApiSync == null || 
+               lastApiSync.isBefore(LocalDateTime.now().minusHours(24));
     }
 }

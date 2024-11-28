@@ -2,39 +2,40 @@ import React, { useState, useEffect, useCallback } from 'react';
 import HeroSection from '../components/sections/HeroSection';
 import RecipeSection from '../components/sections/RecipeSection';
 import useRecipes from '../hooks/useRecipes';
+import { recipeService } from '../services/recipeService';
 import testImage from '../assets/images/testBackground2k.jpg';
 
 const Home = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
-  const { 
-    recipes, 
-    isLoading, 
-    error, 
-    actions 
-  } = useRecipes();
+  const [recipes, setRecipes] = useState({ featured: [] });
+  const [isLoading, setIsLoading] = useState({ featured: true });
+  const [error, setError] = useState({ featured: null });
 
-  // Initial data fetch with debounce
+  const loadRandomRecipes = async () => {
+    try {
+      setIsLoading(prev => ({ ...prev, featured: true }));
+      setError(prev => ({ ...prev, featured: null }));
+      
+      // Clear cache for random recipes by using a new timestamp
+      const freshRecipes = await recipeService.getRandomRecipes(20);
+      
+      setRecipes(prev => ({ ...prev, featured: freshRecipes }));
+    } catch (err) {
+      setError(prev => ({ ...prev, featured: 'Failed to load recipes' }));
+      console.error('Error loading random recipes:', err);
+    } finally {
+      setIsLoading(prev => ({ ...prev, featured: false }));
+    }
+  };
+
   useEffect(() => {
-    let mounted = true;
+    if (!initialLoadComplete) {
+      loadRandomRecipes();
+      setInitialLoadComplete(true);
+    }
+  }, [initialLoadComplete]);
 
-    const loadData = async () => {
-      if (!initialLoadComplete) {
-        await actions.fetchAllRecipes();
-        if (mounted) {
-          setInitialLoadComplete(true);
-        }
-      }
-    };
-
-    loadData();
-
-    return () => {
-      mounted = false;
-    };
-  }, [actions, initialLoadComplete]);
-
-  // Animation trigger
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsVisible(true);
@@ -43,29 +44,9 @@ const Home = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  
-  const renderRecipeSection = useCallback(({ title, recipes, isLoading, error, variant, className }) => (
-    <RecipeSection
-      title={title}
-      recipes={recipes}
-      isLoading={isLoading}
-      error={error}
-      variant={variant}
-      className={className}
-      key={title} 
-    />
-  ), []);
-
-  if (!initialLoadComplete) {
-    return (
-      <main className="relative min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading recipes...</p>
-        </div>
-      </main>
-    );
-  }
+  const handleRefresh = async () => {
+    await loadRandomRecipes();
+  };
 
   return (
     <main className="relative">
@@ -76,32 +57,20 @@ const Home = () => {
         subtitle="Find and share the best recipes from around the world"
       >
         <div className="w-full">
-          <h2 className="text-3xl font-bold text-white mt-10 mb-8 max-w-7xl mx-auto px-4">
-            Featured Recipes
-          </h2>
-          {renderRecipeSection({
-            recipes: recipes.featured,
-            isLoading: isLoading.featured,
-            error: error.featured,
-            className: "pt-0"
-          })}
+          <div className="max-w-7xl mx-0 px-0">
+            <h2 className="text-3xl font-bold text-white mt-10 mb-0 inline-block bg-black/60 px-6 py-3 rounded-lg backdrop-blur-sm">
+              Featured Recipes
+            </h2>
+          </div>
+          <RecipeSection
+            recipes={recipes.featured}
+            isLoading={isLoading.featured}
+            error={error.featured}
+            className="pt-0"
+            onRefresh={handleRefresh}
+          />
         </div>
       </HeroSection>
-
-      {renderRecipeSection({
-        title: "Popular Recipes",
-        recipes: recipes.popular,
-        isLoading: isLoading.popular,
-        error: error.popular,
-        variant: "alternate"
-      })}
-
-      {renderRecipeSection({
-        title: "Latest Recipes",
-        recipes: recipes.latest,
-        isLoading: isLoading.latest,
-        error: error.latest
-      })}
     </main>
   );
 };

@@ -54,7 +54,7 @@ const RecipeSection = ({
   }
 
   return (
-    <section className={`py-12 px-4 sm:px-6 lg:px-8 ${getBackgroundColor()} ${className}`}>
+    <section className={`py-100 px-4 sm:px-6 lg:px-5 p-100 ${getBackgroundColor()} ${className}`}>
       <div className="mx-auto max-w-7xl">
         <h2 className="text-3xl font-bold text-gray-900 mb-8">{title}</h2>
         {recipes.length > 0 ? (
