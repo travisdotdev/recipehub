@@ -1,4 +1,4 @@
-// Fallback data for when API is unavailable
+
 const FALLBACK_RECIPES = [
   {
     id: 1,
@@ -26,11 +26,10 @@ const FALLBACK_RECIPES = [
   }
 ];
 
-// Cache for storing recent API responses
-const cache = new Map();
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
-// Add base URL for backend
+const cache = new Map();
+const CACHE_DURATION = 5 * 60 * 1000; 
+
 const API_BASE_URL = 'http://localhost:8080';
 
 const recipeService = {
@@ -129,10 +128,10 @@ const recipeService = {
       const params = new URLSearchParams({
         ingredients: ingredients,
         number: number,
-        ranking: 2,  // maximize used ingredients
+        ranking: 2,  
         ignorePantry: true,
-        addRecipeInformation: true,  // Added to get full recipe details
-        fillIngredients: true        // Added to get complete ingredient information
+        addRecipeInformation: true,  
+        fillIngredients: true        
       });
 
       const cacheKey = `ingredients-${params.toString()}`;
@@ -153,11 +152,11 @@ const recipeService = {
 
       const data = await response.json();
       
-      // Ensure all required fields are present
+   
       const recipes = Array.isArray(data) ? data.map(recipe => ({
         ...recipe,
-        readyInMinutes: recipe.readyInMinutes || 30, // Default value if missing
-        servings: recipe.servings || 4,              // Default value if missing
+        readyInMinutes: recipe.readyInMinutes || 30,
+        servings: recipe.servings || 4,             
         image: recipe.image || "/api/placeholder/400/300",
         imageType: recipe.imageType || "jpg"
       })) : [];

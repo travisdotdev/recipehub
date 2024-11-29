@@ -73,6 +73,15 @@ const RecipeDetail = () => {
     }, 100);
   };
 
+  // New function to handle adding ingredients to shopping list
+  const handleAddToShoppingList = () => {
+    const ingredients = recipe.extendedIngredients.map((ingredient) => {
+      return `${ingredient.amount} ${ingredient.unit} ${ingredient.name}`;
+    });
+    // Passing ingredients to the shopping list page
+    navigate('/shopping-list', { state: { ingredients } });
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 pt-16 px-4">
@@ -120,7 +129,6 @@ const RecipeDetail = () => {
 
   const sanitizedInstructions = DOMPurify.sanitize(recipe.instructions);
 
- 
   const formatAmount = (amount) => {
     return amount % 1 === 0 ? amount : amount.toFixed(2); 
   };
@@ -194,6 +202,14 @@ const RecipeDetail = () => {
                 />
               </div>
             )}
+
+            {/* Add Button to Shopping List */}
+            <button
+              onClick={handleAddToShoppingList}
+              className="mt-6 py-2 px-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            >
+              Add Ingredients to Shopping List
+            </button>
 
             {recipe.sourceUrl && (
               <div className="mt-6 pt-6 border-t border-gray-200">
