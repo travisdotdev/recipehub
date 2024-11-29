@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ChevronLeft, Clock, Users } from 'lucide-react';
+import DOMPurify from 'dompurify'; 
 
 const RecipeDetail = () => {
   const [recipe, setRecipe] = useState(null);
@@ -11,7 +12,7 @@ const RecipeDetail = () => {
 
   useEffect(() => {
     let isMounted = true;
-    
+
     const fetchRecipe = async () => {
       try {
         if (isMounted) {
@@ -20,15 +21,15 @@ const RecipeDetail = () => {
         }
 
         const response = await fetch(`http://localhost:8080/api/recipes/${id}`);
-        
+
         if (!isMounted) return;
 
         if (!response.ok) {
           throw new Error(`Recipe not found (Status: ${response.status})`);
         }
-        
+
         const data = await response.json();
-        
+
         if (isMounted) {
           setRecipe({
             id: data.id || data.spoonacularId,
@@ -63,10 +64,8 @@ const RecipeDetail = () => {
   }, [id]);
 
   const handleBack = (e) => {
-    e.preventDefault();
-    // First try to go back
+    e.preventDefault(); 
     window.history.back();
-    // If there's no history, redirect to home
     setTimeout(() => {
       if (window.location.pathname === `/recipe/${id}`) {
         navigate('/');
@@ -119,6 +118,8 @@ const RecipeDetail = () => {
     return null;
   }
 
+  const sanitizedInstructions = DOMPurify.sanitize(recipe.instructions);
+
   return (
     <div className="min-h-screen bg-gray-50 pt-16 px-4">
       <div className="max-w-3xl mx-auto mt-8">
@@ -168,9 +169,10 @@ const RecipeDetail = () => {
             {recipe.instructions && (
               <div className="mb-6">
                 <h2 className="text-xl font-semibold text-gray-900 mb-3">Instructions</h2>
-                <p className="text-gray-700 whitespace-pre-line">
-                  {recipe.instructions}
-                </p>
+                <div
+                  className="text-gray-700"
+                  dangerouslySetInnerHTML={{ __html: sanitizedInstructions }}
+                />
               </div>
             )}
 
