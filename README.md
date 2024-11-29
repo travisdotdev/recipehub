@@ -120,3 +120,4 @@ npm test
 
 - The application requires a Spoonacular API key to function. Multiple API keys are provided above in case of rate limiting. The limit is 150 tokens and we've added rate limiting so it shouldn't be an issue.
 - The Docker setup includes all necessary dependencies and database configuration.
+- Diary is in root directory of repository "Group 19 Design Diary.pdf"
