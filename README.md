@@ -4,6 +4,9 @@ https://media.heanet.ie/page/REDACTED
 # Download link to our video:
 https://media.heanet.ie/page/REDACTED
 
+# Jira link
+https://csu33012-2425-project19.atlassian.net/jira/software/projects/SCRUM/summary
+
 # Recipe Application
 
 A full-stack web application for discovering and managing recipes using the Spoonacular API. Built with Spring Boot, React, and MySQL.
