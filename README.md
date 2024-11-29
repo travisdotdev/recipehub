@@ -8,7 +8,7 @@ https://media.heanet.ie/page/REDACTED
 
 A full-stack web application for discovering and managing recipes using the Spoonacular API. Built with Spring Boot, React, and MySQL.
 
-![alt text](image.png)
+![alt text](frontendPage.png)
 
 
 ## Prerequisites
@@ -117,7 +117,6 @@ npm test
 └── docker-compose.yml    # Docker configuration
 
 ## Notes for Graders
-
 - The application requires a Spoonacular API key to function. Multiple API keys are provided above in case of rate limiting. The limit is 150 tokens and we've added rate limiting so it shouldn't be an issue.
 - The Docker setup includes all necessary dependencies and database configuration.
 - Diary is in root directory of repository "Group 19 Design Diary.pdf"
