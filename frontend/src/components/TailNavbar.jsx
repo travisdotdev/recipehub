@@ -6,7 +6,6 @@ const TailNavbar = ({ brandName = "RecipeHub" }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchType, setSearchType] = useState('name');
   const navigate = useNavigate();
   
   const dropdownRef = useRef(null);
@@ -29,7 +28,7 @@ const TailNavbar = ({ brandName = "RecipeHub" }) => {
   const handleSearch = async (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}&type=${searchType}`);
+      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
       setSearchQuery('');
       setIsSearchOpen(false);
     }
@@ -37,7 +36,6 @@ const TailNavbar = ({ brandName = "RecipeHub" }) => {
 
   const navItems = [
     { name: 'Home', path: '/' },
-    { name: 'Search Recipes', path: '/search' },
     { name: 'Shopping List', path: '/shopping-list' },
     { name: 'About Us', path: '/about-us' },
   ];
@@ -59,9 +57,7 @@ const TailNavbar = ({ brandName = "RecipeHub" }) => {
 
           <div className="flex items-center space-x-4">
             <div ref={searchRef} className="relative flex items-center">
-              <div className={`transition-all duration-200 ${
-                isSearchOpen ? 'w-64' : 'w-8'
-              }`}>
+              <div className={`transition-all duration-200 ${isSearchOpen ? 'w-64' : 'w-8'}`}>
                 {isSearchOpen ? (
                   <form onSubmit={handleSearch} className="flex items-center">
                     <div className="flex flex-col w-full">
@@ -70,7 +66,7 @@ const TailNavbar = ({ brandName = "RecipeHub" }) => {
                           type="text"
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
-                          placeholder={searchType === 'ingredients' ? "Enter ingredients..." : "Search recipes..."}
+                          placeholder="Search recipes..."
                           className="w-full px-4 py-1 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-200 transition-all duration-200"
                           autoFocus
                         />
@@ -83,30 +79,6 @@ const TailNavbar = ({ brandName = "RecipeHub" }) => {
                           className="ml-2 text-gray-500 hover:text-gray-700 transition-colors duration-200"
                         >
                           <X className="h-5 w-5" />
-                        </button>
-                      </div>
-                      <div className="flex gap-2 mt-1 text-xs">
-                        <button
-                          type="button"
-                          onClick={() => setSearchType('name')}
-                          className={`px-2 py-1 rounded ${
-                            searchType === 'name' 
-                              ? 'bg-gray-200 text-gray-800' 
-                              : 'text-gray-600 hover:bg-gray-100'
-                          }`}
-                        >
-                          Search by name
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setSearchType('ingredients')}
-                          className={`px-2 py-1 rounded ${
-                            searchType === 'ingredients' 
-                              ? 'bg-gray-200 text-gray-800' 
-                              : 'text-gray-600 hover:bg-gray-100'
-                          }`}
-                        >
-                          Search by ingredients
                         </button>
                       </div>
                     </div>
@@ -122,6 +94,13 @@ const TailNavbar = ({ brandName = "RecipeHub" }) => {
                 )}
               </div>
             </div>
+
+            {/* Description under the search bar */}
+            {isSearchOpen && (
+              <p className="text-xs text-gray-500 mt-2 w-64 text-center">
+                Search by recipe name or ingredients (comma-separated, e.g. flour, sugar, egg)
+              </p>
+            )}
 
             <div ref={dropdownRef} className="relative">
               <button
