@@ -32,17 +32,17 @@ class RecipeControllerTest {
 
     @Test
     void getFeaturedRecipes_Success() {
-        // Arrange
+
         List<RecipeDTO> mockRecipes = Arrays.asList(
             createMockRecipe(1L, "Recipe 1"),
             createMockRecipe(2L, "Recipe 2")
         );
         when(spoonacularService.getFeaturedRecipes(10)).thenReturn(mockRecipes);
 
-        // Act
+
         ResponseEntity<List<RecipeDTO>> response = recipeController.getFeaturedRecipes(10);
 
-        // Assert
+
         assertTrue(response.getStatusCode().is2xxSuccessful());
         assertEquals(2, response.getBody().size());
         verify(spoonacularService).getFeaturedRecipes(10);
@@ -50,27 +50,27 @@ class RecipeControllerTest {
 
     @Test
     void getFeaturedRecipes_Error() {
-        // Arrange
+
         when(spoonacularService.getFeaturedRecipes(10)).thenThrow(new RuntimeException("API Error"));
 
-        // Act
+
         ResponseEntity<List<RecipeDTO>> response = recipeController.getFeaturedRecipes(10);
 
-        // Assert
+
         assertTrue(response.getStatusCode().is5xxServerError());
         verify(spoonacularService).getFeaturedRecipes(10);
     }
 
     @Test
     void getPopularRecipes_Success() {
-        // Arrange
+
         List<RecipeDTO> mockRecipes = Arrays.asList(createMockRecipe(1L, "Popular Recipe"));
         when(spoonacularService.getPopularRecipes(10)).thenReturn(mockRecipes);
 
-        // Act
+
         ResponseEntity<List<RecipeDTO>> response = recipeController.getPopularRecipes(10);
 
-        // Assert
+
         assertTrue(response.getStatusCode().is2xxSuccessful());
         assertEquals(1, response.getBody().size());
         verify(spoonacularService).getPopularRecipes(10);
@@ -78,14 +78,14 @@ class RecipeControllerTest {
 
     @Test
     void getLatestRecipes_Success() {
-        // Arrange
+
         List<RecipeDTO> mockRecipes = Arrays.asList(createMockRecipe(1L, "Latest Recipe"));
         when(spoonacularService.getLatestRecipes(10)).thenReturn(mockRecipes);
 
-        // Act
+
         ResponseEntity<List<RecipeDTO>> response = recipeController.getLatestRecipes(10);
 
-        // Assert
+
         assertTrue(response.getStatusCode().is2xxSuccessful());
         assertEquals(1, response.getBody().size());
         verify(spoonacularService).getLatestRecipes(10);
@@ -93,16 +93,16 @@ class RecipeControllerTest {
 
     @Test
     void searchByIngredients_Success() {
-        // Arrange
+
         List<RecipeDTO> mockRecipes = Arrays.asList(createMockRecipe(1L, "Recipe with Ingredients"));
         when(spoonacularService.searchByIngredients("tomato,basil", 5, 2, true))
             .thenReturn(mockRecipes);
 
-        // Act
+
         ResponseEntity<List<RecipeDTO>> response = recipeController.searchByIngredients(
             "tomato,basil", 5, 2, true);
 
-        // Assert
+
         assertTrue(response.getStatusCode().is2xxSuccessful());
         assertEquals(1, response.getBody().size());
         verify(spoonacularService).searchByIngredients("tomato,basil", 5, 2, true);
@@ -110,7 +110,7 @@ class RecipeControllerTest {
 
     @Test
     void complexSearch_Success() {
-        // Arrange
+
         List<RecipeDTO> mockRecipes = Arrays.asList(createMockRecipe(1L, "Complex Search Recipe"));
         SpoonacularService.ComplexSearchParams expectedParams = SpoonacularService.ComplexSearchParams.builder()
             .query("pasta")
@@ -120,11 +120,11 @@ class RecipeControllerTest {
             .build();
         when(spoonacularService.complexSearch(any())).thenReturn(mockRecipes);
 
-        // Act
+
         ResponseEntity<List<RecipeDTO>> response = recipeController.complexSearch(
             "pasta", "italian", "vegetarian", null, null, null, null, null, null, 10);
 
-        // Assert
+
         assertTrue(response.getStatusCode().is2xxSuccessful());
         assertEquals(1, response.getBody().size());
         verify(spoonacularService).complexSearch(any());
@@ -132,14 +132,14 @@ class RecipeControllerTest {
 
     @Test
     void getRecipeById_Success() {
-        // Arrange
+
         RecipeDTO mockRecipe = createMockRecipe(1L, "Single Recipe");
         when(spoonacularService.getRecipeById(1L)).thenReturn(mockRecipe);
 
-        // Act
+
         ResponseEntity<RecipeDTO> response = recipeController.getRecipeById(1L);
 
-        // Assert
+
         assertTrue(response.getStatusCode().is2xxSuccessful());
         assertEquals("Single Recipe", response.getBody().getTitle());
         verify(spoonacularService).getRecipeById(1L);
@@ -147,14 +147,14 @@ class RecipeControllerTest {
 
     @Test
     void getRecipeInstructions_Success() {
-        // Arrange
+
         List<ParsedInstruction> mockInstructions = Arrays.asList(createMockInstruction());
         when(spoonacularService.getRecipeInstructions(1L)).thenReturn(mockInstructions);
 
-        // Act
+
         ResponseEntity<List<ParsedInstruction>> response = recipeController.getRecipeInstructions(1L);
 
-        // Assert
+
         assertTrue(response.getStatusCode().is2xxSuccessful());
         assertEquals(1, response.getBody().size());
         verify(spoonacularService).getRecipeInstructions(1L);
@@ -162,16 +162,16 @@ class RecipeControllerTest {
 
     @Test
     void getRandomRecipes_Success() {
-        // Arrange
+
         List<RecipeDTO> mockRecipes = Arrays.asList(createMockRecipe(1L, "Random Recipe"));
         when(spoonacularService.getRandomRecipes(20, "vegetarian", "dessert", false))
             .thenReturn(mockRecipes);
 
-        // Act
+
         ResponseEntity<List<RecipeDTO>> response = recipeController.getRandomRecipes(
             20, "vegetarian", "dessert", false);
 
-        // Assert
+
         assertTrue(response.getStatusCode().is2xxSuccessful());
         assertEquals(1, response.getBody().size());
         verify(spoonacularService).getRandomRecipes(20, "vegetarian", "dessert", false);
