@@ -5,7 +5,6 @@ import App from './App';
 jest.mock('./pages/Home', () => () => <div>Home Page</div>);
 jest.mock('./pages/RecipeDetail', () => () => <div>Recipe Detail Page</div>);
 jest.mock('./pages/ShoppingList', () => () => <div>Shopping List Page</div>);
-jest.mock('./pages/AboutUs', () => () => <div>About Us Page</div>);
 jest.mock('./pages/Search', () => () => <div>Search Page</div>);
 jest.mock('./components/TailNavbar', () => () => <div>Navigation Bar</div>);
 

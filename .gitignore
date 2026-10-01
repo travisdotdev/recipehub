@@ -192,3 +192,5 @@ Icon
 *.cert
 *.key
 >>>>>>> clean-frontend
+
+.direnv/

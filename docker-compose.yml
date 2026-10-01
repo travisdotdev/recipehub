@@ -29,7 +29,7 @@ services:
       SPRING_JPA_HIBERNATE_DDL-AUTO: update
       SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.MySQL8Dialect
       SPRING_JPA_SHOW-SQL: true
-      SPOONACULAR_API_KEY: REDACTED 
+      SPOONACULAR_API_KEY: ${SPOONACULAR_API_KEY} 
 
   frontend:
     build: ./frontend
