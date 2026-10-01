@@ -1,125 +1,145 @@
-# Public link to our video
-https://media.heanet.ie/page/REDACTED
+  # RecipeHub
 
-# Download link to our video:
-https://media.heanet.ie/page/REDACTED
+A full-stack recipe discovery app. Browse featured recipes, search by dish or by the ingredients you already have, read step-by-step instructions, and build a printable shopping list from any recipe.
 
-# Jira link
-https://csu33012-2425-project19.atlassian.net/jira/software/projects/SCRUM/summary
+Built with **Spring Boot**, **React** and **MySQL** on top of the [Spoonacular API](https://spoonacular.com/food-api).
 
-# Recipe Application
+![RecipeHub homepage](frontendPage.png)
 
-A full-stack web application for discovering and managing recipes using the Spoonacular API. Built with Spring Boot, React, and MySQL.
+## About this project
 
-![alt text](frontendPage.png)
+RecipeHub was built by a team of six as a university software engineering project in autumn 2024.
 
+My main contributions:
 
-## Prerequisites
+- **Backend architecture.** Split the backend into a recipe service and a dedicated Spoonacular API client service, and reworked the API endpoints and response models.
+- **Frontend structure.** Rebuilt the homepage into hero and recipe sections backed by custom React hooks for API calls, and refactored the recipe cards, carousel and detail page.
+- **Search.** Added search-type options and wired complex search into the navbar search bar.
+- **Docker and testing.** Containerised the app with Docker Compose and wrote backend and frontend tests.
+- **Repository and docs.** Set up the branch structure and wrote the setup documentation.
 
-- Docker and Docker Compose
-- Java 21
-- Node.js 18+
-- MySQL 8.0+
-- Maven 3.8+
+## Features
 
-## Quick Start with Docker:
+- A homepage carousel of featured recipes
+- Search by dish name, or by ingredients you have on hand
+- Recipe pages with ingredients and parsed step-by-step instructions
+- Shopping list: send a recipe's ingredients to a list, add or remove items, and print it
+- Server-side caching and rate limiting to stay within Spoonacular's free tier
+
+## Tech stack
+
+| Layer    | Technology                                   |
+|----------|----------------------------------------------|
+| Frontend | React 18, React Router, Tailwind CSS         |
+| Backend  | Java 21, Spring Boot 3.4, Spring Data JPA, WebClient |
+| Database | MySQL 8                                      |
+| Testing  | JUnit, Mockito, Jest, React Testing Library  |
+| Tooling  | Docker Compose, Maven, Nix dev shell         |
+
+## How it works
+
+```
+React (localhost:3000)
+   │  REST
+   ▼
+Spring Boot API (localhost:8080)
+   │  in-memory cache + rate limiter
+   ▼
+Spoonacular API
+```
+
+The backend sits between the frontend and Spoonacular, so the API key never reaches the browser. Recipe responses are cached in memory for a short time, and a per-minute and per-day limiter keeps usage within the free plan. MySQL is connected through Spring Data JPA.
+
+## Getting started
+
+You'll need a free Spoonacular API key from [spoonacular.com/food-api](https://spoonacular.com/food-api).
+
+### Run with Docker
+
+The only requirement is Docker.
+
 ```bash
-git clone https://gitlab.scss.tcd.ie/csu33012-2425-group19/csu33012-2425-project19.git
-cd csu33012-2425-project19
-docker-compose build
-docker-compose up
+git clone https://github.com/travisdotdev/recipehub.git
+cd recipehub
+export SPOONACULAR_API_KEY=your-key
+docker compose up --build
+```
 
-
-
-The application will be available at:
 - Frontend: http://localhost:3000
+- API: http://localhost:8080/api/recipes
 
-## Manual Setup
+### Run locally for development
 
-### Backend Setup
+Requirements: Java 21, Maven, Node.js 18+ and Docker (for MySQL). With Nix, `nix develop` (or `direnv allow`) provides the toolchain.
 
-1. Configure MySQL database:
-```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/recipe_db
-spring.datasource.username=recipeHub_db
-spring.datasource.password=RandomPassword
-```
-
-2. Set up Spoonacular API key in `docker-compose.yml`: REDACTED
-
-Alternative API keys (if rate limit is reached):
-REDACTED
-REDACTED 
-
-3. Build and run the backend:
 ```bash
-mvn clean install
-mvn spring:run
-```
+export SPOONACULAR_API_KEY=your-key
 
-### Frontend Setup
+# Database
+docker compose up -d mysql
 
-1. Install dependencies:
-```bash
+# Backend (port 8080)
+cd backend
+mvn spring-boot:run
+
+# Frontend (port 3000), in a second terminal
 cd frontend
 npm install
-```
-
-2. Start the development server:
-```bash
 npm start
 ```
 
-## API Documentation
+## Tests
 
-The backend API is available at `http://localhost:8080/api/recipes` with the following endpoints:
-- GET `/searchByIngredients` - Search recipes by ingredients
-- GET `/complexSearch` - Advanced recipe search
-
-## Testing
-
-Run backend tests:
 ```bash
+# Frontend
+cd frontend
+npm test
+
+# Backend (needs the MySQL container running)
+cd backend
 mvn test
 ```
 
-Run frontend tests:
-```bash
-cd frontend
-npm test
+## API
+
+Recipes, under `/api/recipes`:
+
+| Method | Path                         | Description                             |
+|--------|------------------------------|-----------------------------------------|
+| GET    | `/featured`, `/popular`, `/latest`, `/random` | Recipe lists for the homepage |
+| GET    | `/complexSearch`             | Search by query                         |
+| GET    | `/searchByIngredients`       | Recipes that use the given ingredients  |
+| GET    | `/{id}`, `/{id}/information` | Full recipe details                     |
+| GET    | `/{id}/ingredients`          | Ingredient list                         |
+| GET    | `/{id}/instructions`         | Parsed step-by-step instructions        |
+
+Shopping list, under `/shoppinglist`:
+
+| Method | Path                          | Description          |
+|--------|-------------------------------|----------------------|
+| GET    | `/items`                      | List items           |
+| POST   | `/add`                        | Add an item          |
+| PUT    | `/updateQuantity/{itemName}`  | Change a quantity    |
+| DELETE | `/delete/{itemName}`          | Remove an item       |
+
+## Project structure
+
 ```
-
-## Technologies Used
-
-- Backend: Spring Boot 3.4.0, Java 21
-- Frontend: React 18.3.1, TailwindCSS
-- Database: MySQL 8.0
-- API: Spoonacular
-- Testing: JUnit, React Testing Library
-- Containerization: Docker
-
-## Project Structure
-├── backend/
-│   ├── src/main/java/
-│   │   ├── controller/    # REST API endpoints
-│   │   ├── service/       # Business logic and Spoonacular API integration
-│   │   ├── dto/           # Data transfer objects
-│   │   ├── entity/        # Database entities
-│   │   ├── repository/    # Data access layer
-│   │   └── config/        # Application configuration
-│   └── pom.xml           # Maven dependencies
-│
-├── frontend/
-│   ├── src/
-│   │   ├── components/   # Reusable React components
-│   │   ├── pages/        # Page components and routing
-│   │   ├── services/     # API integration
-│   │   └── hooks/        # Custom React hooks
-│   └── package.json      # npm dependencies
-│
-└── docker-compose.yml    # Docker configuration
-
-## Notes for Graders
-- The application requires a Spoonacular API key to function. Multiple API keys are provided above in case of rate limiting. The limit is 150 tokens and we've added rate limiting so it shouldn't be an issue.
-- The Docker setup includes all necessary dependencies and database configuration.
-- Diary is in root directory of repository "Group 19 Design Diary.pdf"
+recipehub/
+├── backend/                 Spring Boot API
+│   └── src/main/java/.../
+│       ├── controller/      REST endpoints
+│       ├── service/         Business logic and Spoonacular client
+│       ├── entity/          JPA entities
+│       ├── repository/      Data access
+│       ├── dto/             API response models
+│       └── config/          Spoonacular, WebClient and CORS config
+├── frontend/                React app
+│   └── src/
+│       ├── components/      Navbar, recipe cards, carousels
+│       ├── pages/           Home, Search, Recipe detail, Shopping list
+│       ├── hooks/           Data-fetching hooks
+│       └── services/        API client
+├── docker-compose.yml       MySQL, backend and frontend
+└── flake.nix                Nix dev shell
+```
